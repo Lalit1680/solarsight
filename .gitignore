@@ -1,0 +1,35 @@
+# --- Secrets: never commit real keys ---
+.streamlit/secrets.toml
+.env
+
+# --- Model weights (large, downloaded/trained) ---
+models/*.pt
+models/*.onnx
+
+# --- Dataset (366 MB, reproducible via training/download_data.py) ---
+data/
+
+# --- Training runs (Ultralytics writes weights + logs here) ---
+runs/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# --- Local agent/tool state ---
+.freebuff/
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+.DS_Store
+
+# --- Streamlit / coverage artifacts ---
+.streamlit/logs/
+.coverage
+htmlcov/
+yolo11n.pt
