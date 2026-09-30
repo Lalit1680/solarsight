@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SolarSight — The Complete Beginner's Guide</title>
+<style>
+  @page { size: A4; margin: 16mm 14mm 18mm 14mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", "DejaVu Sans", Arial, sans-serif; font-size: 10.5pt; line-height: 1.5; color: #1a2332; margin: 0; }
+  h1 { font-size: 21pt; color: #0b3d66; border-bottom: 3px solid #f2a900; padding-bottom: 6px; margin: 0 0 4px 0; }
+  h2 { font-size: 15pt; color: #0b3d66; border-bottom: 2px solid #d8e2ec; padding-bottom: 3px; margin: 26px 0 10px 0; page-break-after: avoid; }
+  h3 { font-size: 12pt; color: #14507f; margin: 18px 0 6px 0; page-break-after: avoid; }
+  h4 { font-size: 10.5pt; color: #14507f; margin: 12px 0 4px 0; page-break-after: avoid; }
+  p { margin: 6px 0; }
+  ul, ol { margin: 6px 0 6px 2px; padding-left: 20px; }
+  li { margin: 3px 0; }
+  code { font-family: "DejaVu Sans Mono", Consolas, monospace; font-size: 8.8pt; background: #eef2f7; padding: 1px 4px; border-radius: 3px; }
+  pre { font-family: "DejaVu Sans Mono", Consolas, monospace; font-size: 8.4pt; background: #0f1c2e; color: #d9e6f5; padding: 10px 12px; border-radius: 6px; overflow-x: hidden; white-space: pre-wrap; line-height: 1.42; page-break-inside: avoid; }
+  pre code { background: none; color: inherit; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 9.3pt; page-break-inside: avoid; }
+  th { background: #0b3d66; color: #fff; text-align: left; padding: 5px 8px; }
+  td { border: 1px solid #c6d2de; padding: 4px 8px; vertical-align: top; }
+  tr:nth-child(even) td { background: #f2f6fa; }
+  .box { border-radius: 6px; padding: 8px 12px; margin: 10px 0; page-break-inside: avoid; }
+  .why { background: #eaf3ea; border-left: 4px solid #2e7d32; }
+  .warn { background: #fdf0e7; border-left: 4px solid #d97706; }
+  .tip { background: #e8f1fb; border-left: 4px solid #2563eb; }
+  .story { background: #f6f0fa; border-left: 4px solid #7c3aed; }
+  .qa { border: 1px solid #c6d2de; border-radius: 6px; padding: 8px 12px; margin: 8px 0; page-break-inside: avoid; }
+  .qa .q { font-weight: bold; color: #0b3d66; }
+  .qa .a { margin-top: 4px; }
+  .cover { text-align: center; padding-top: 60px; page-break-after: always; }
+  .cover .subtitle { font-size: 13pt; color: #44566c; margin-top: 10px; }
+  .cover .meta { margin-top: 40px; color: #6b7a8d; font-size: 10pt; }
+  .sun { font-size: 46pt; }
+  .toc { page-break-after: always; }
+  .toc ol { columns: 2; column-gap: 24px; font-size: 9.5pt; }
+  .small { font-size: 8.8pt; color: #5b6b7d; }
+  .kbd { border: 1px solid #9fb1c4; border-bottom-width: 2px; border-radius: 3px; padding: 0 4px; font-size: 8.8pt; background: #fff; }
+  .diagram { background: #f2f6fa; border: 1px solid #c6d2de; border-radius: 6px; padding: 10px; page-break-inside: avoid; }
+  .pagebreak { page-break-before: always; }
+  .num { color: #b45309; font-weight: bold; }
+  .avoid { page-break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<!-- ================= COVER ================= -->
+<div class="cover">
+  <div class="sun">☀️</div>
+  <h1>SolarSight</h1>
+  <div class="subtitle">The Complete Beginner's Guide<br>Every question an interviewer could ask — answered from zero</div>
+  <div class="meta">
+    Thermal solar-panel fault detection with YOLO11, Streamlit &amp; Supabase<br>
+    Project by Lalit Ranjan Behera &nbsp;·&nbsp; Guide version 1.0 &nbsp;·&nbsp; September 2026<br>
+    All metrics in this guide come from runs actually performed on this machine (CPU-only).<br>
+    Nothing here is invented — items that were <b>not</b> tested are labelled honestly.
+  </div>
+</div>
+
+<!-- ================= TOC ================= -->
+<div class="toc">
+<h2>Contents</h2>
+<ol>
+  <li>How to use this guide</li>
+  <li>The project in one story</li>
+  <li>Every concept you need (zero-knowledge vocabulary)</li>
+  <li>Architecture — how the pieces fit</li>
+  <li>The dataset — what we trained on</li>
+  <li>Training — what actually happened</li>
+  <li>Evaluation — reading the numbers honestly</li>
+  <li>Inside the app — module by module</li>
+  <li>The database — Supabase &amp; PostgreSQL</li>
+  <li>Testing &amp; CI — how we know it works</li>
+  <li>Docker &amp; deployment</li>
+  <li>Roadmap — what comes next</li>
+  <li>Interview Q&amp;A bank (45 questions)</li>
+  <li>Known limitations — the honest list</li>
+  <li>Cheat sheet — every number you must remember</li>
+  <li>Glossary quick reference</li>
+</ol>
+</div>
+
+<!-- ================= PART 1 ================= -->
+<h2>1. How to use this guide</h2>
+<p>This guide assumes <b>zero prior knowledge</b>. It is written for someone who has never trained a model,
+never used a database, and never deployed an app. Read it top to bottom the first time; later, jump to a
+section before an interview. Three kinds of callouts appear throughout:</p>
+<ul>
+  <li><span class="box why" style="display:inline-block;padding:1px 8px;"><b>WHY</b></span> — the reasoning behind a design choice (interviewers love asking "why?").</li>
+  <li><span class="box warn" style="display:inline-block;padding:1px 8px;"><b>HONEST</b></span> — a limitation or something that was <i>not</i> tested. Never oversell these in an interview.</li>
+  <li><span class="box tip" style="display:inline-block;padding:1px 8px;"><b>TIP</b></span> — a memory hook or a likely interview follow-up.</li>
+</ul>
+<div class="box warn"><b>Golden rule of this project:</b> every number in this guide was actually measured on this
+machine. If a thing was not run (Docker build, GPU training, live Supabase round-trip), the guide says so
+explicitly. In interviews, this honesty is a strength, not a weakness.</div>
+
+<!-- ================= PART 2 ================= -->
+<h2>2. The project in one story</h2>
+<div class="box story">
+<b>The story (memorise this 60-second version):</b> Solar panels develop hot defects — broken bypass diodes,
+faulty strings — that are invisible to the naked eye but show up as hot spots in <b>thermal (infrared) images</b>.
+Today, technicians inspect panels by carrying a thermal camera and judging images by eye: slow, inconsistent,
+and easy to get wrong. SolarSight is a web application where an inspector uploads a thermal image (or video),
+a trained AI model called <b>YOLO11n</b> finds and labels the faults in under a second on a normal laptop CPU,
+draws boxes around them with a confidence score, and saves a record of the inspection to a cloud database.
+A <b>History screen</b> shows past inspections with charts and a CSV export for reports. The project was built
+end-to-end on a CPU-only laptop: dataset from Kaggle, training, evaluation, testing (33 automated tests),
+documentation, and deployment packaging.
+</div>
+<h3>What the user actually sees</h3>
+<ul>
+  <li><b>Upload screen:</b> a sidebar (site name, confidence slider, IoU slider, screen picker) and an
+      image/video uploader. After analysis: the annotated image with coloured boxes, a table of detections
+      (class + confidence), and a "Save inspection" button.</li>
+  <li><b>History screen:</b> past inspections with filters (site, media type), charts of fault types,
+      drill-down into any inspection, and one-click CSV export.</li>
+</ul>
+<h3>The 8 fault classes the model detects</h3>
+<p>These names come straight from the dataset. In plain English:</p>
+<table>
+<tr><th>Class</th><th>What it means physically</th></tr>
+<tr><td><code>MultiByPassed</code></td><td>Several bypass diodes are shorted/active — usually a whole sub-string of cells running hot.</td></tr>
+<tr><td><code>MultiDiode</code></td><td>Several individual diode defects — multiple small hot patches on one panel.</td></tr>
+<tr><td><code>MultiHotSpot</code></td><td>Multiple hot spots — cells overheating, e.g. from shading or soiling.</td></tr>
+<tr><td><code>SingleByPassed</code></td><td>One bypass diode bypassed — a distinct hot band pattern.</td></tr>
+<tr><td><code>SingleDiode</code></td><td>One diode fault — a single localised hot patch.</td></tr>
+<tr><td><code>SingleHotSpot</code></td><td>One hot spot — a single overheating cell or area.</td></tr>
+<tr><td><code>StringOpenCircuit</code></td><td>A string (chain) of panels has an open circuit — characteristic whole-string pattern.</td></tr>
+<tr><td><code>StringReversedPolarity</code></td><td>A string wired with reversed polarity — a dangerous wiring fault.</td></tr>
+</table>
+<div class="box tip"><b>TIP:</b> the names encode <i>count</i> (Single/Multi/String) + <i>fault type</i>
+(Bypassed/Diode/HotSpot/OpenCircuit/ReversedPolarity). If an interviewer asks "what is a bypass diode?":
+it is a safety diode wired in parallel with a group of cells; when cells are shaded or damaged it gives
+current an alternate path so the panel does not burn out — but if the diode itself fails, part of the panel
+runs hot, which is exactly what thermal cameras see.</div>
+
+<!-- ================= PART 3 ================= -->
+<h2>3. Every concept you need (zero-knowledge vocabulary)</h2>
+<p class="small">Each entry: what it is in one or two sentences, then why this project uses it.</p>
+
+<h3>3.1 AI and machine learning basics</h3>
+<table>
+<tr><th style="width:22%">Term</th><th>Explanation</th></tr>
+<tr><td><b>Artificial Intelligence (AI)</b></td><td>Software that performs tasks that normally need human intelligence. Machine learning is one way of building AI.</td></tr>
+<tr><td><b>Machine Learning (ML)</b></td><td>Instead of writing rules by hand, we show a program many examples and it <i>learns</i> the rules. SolarSight shows a network thousands of thermal images with boxes drawn around faults; it learns what faults look like.</td></tr>
+<tr><td><b>Supervised learning</b></td><td>Learning from examples that already have the correct answer attached (labels). Our dataset has boxes with class names — that is supervision. Opposite: unsupervised (no labels).</td></tr>
+<tr><td><b>Classification vs. detection</b></td><td>Classification answers "what is in this image?" (one label). <b>Object detection</b> answers "what is here, and exactly where?" — a list of (class, box, confidence). SolarSight needs detection, because an image can contain several different faults at known positions.</td></tr>
+<tr><td><b>Neural network</b></td><td>A stack of simple mathematical units ("neurons") organised in layers. Each layer transforms its input a little; stacked together they can recognise complex patterns. "Deep learning" = many layers.</td></tr>
+<tr><td><b>CNN (Convolutional Neural Network)</b></td><td>A network whose layers slide small filters across the image to detect local patterns (edges → textures → parts → objects). This matches how images are structured, so CNNs dominate vision tasks. YOLO is a CNN-based detector.</td></tr>
+<tr><td><b>Weights (parameters)</b></td><td>The learned numbers inside the network. "Training" = adjusting weights so predictions match labels. Our trained model is one file, <code>models/best.pt</code>, about 5.4 MB of weights.</td></tr>
+<tr><td><b>Inference</b></td><td>Using a trained model to predict on new data. Training happens once; inference happens every time the app analyses an upload. Measured on this CPU: <span class="num">76 ms/image</span> for the nano model at 640 px.</td></tr>
+<tr><td><b>GPU vs CPU</b></td><td>A GPU has thousands of small cores — ideal for the maths of training. This machine has <b>no GPU</b>, so training ran on the 8-core CPU, which is why we trained a small model at a modest resolution for few epochs (Part 6). Inference is fast enough on CPU.</td></tr>
+</table>
+
+<h3>3.2 YOLO and object detection</h3>
+<table>
+<tr><th style="width:22%">Term</th><th>Explanation</th></tr>
+<tr><td><b>YOLO</b></td><td>"You Only Look Once" — a detector that predicts all objects in <b>one pass</b> of the network (older methods ran the network thousands of times per image). One pass = fast, which is why YOLO is the industry standard for real-time detection. We use <b>YOLO11n</b> ("nano" = the smallest, fastest variant of the YOLO11 family) via the <code>ultralytics</code> library.</td></tr>
+<tr><td><b>Bounding box</b></td><td>The rectangle drawn around a detected object. Stored as x1, y1 (top-left) and x2, y2 (bottom-right) pixel coordinates — exactly the columns in our <code>detections</code> table.</td></tr>
+<tr><td><b>Confidence score</b></td><td>A number 0–1 for how sure the model is that a box really contains that class. We discard predictions below <b>0.40</b> (the <code>DEFAULT_CONF_THRESHOLD</code> in <code>src/config.py</code>). Lower → more detections but more false alarms; higher → safer but misses subtle faults.</td></tr>
+<tr><td><b>NMS — Non-Maximum Suppression</b></td><td>The model often proposes several overlapping boxes for the same fault. NMS keeps the highest-confidence box and drops overlaps (measured by IoU above a threshold, ours <b>0.45</b>). Without NMS you would see 3 boxes on one hot spot.</td></tr>
+<tr><td><b>Feature pyramid / multi-scale heads</b></td><td>YOLO detects at three output scales (small/medium/large boxes) so both tiny hot spots and whole-string faults are caught. (Concept question only — nothing to configure.)</td></tr>
+<tr><td><b>Transfer learning</b></td><td>Starting from a model already trained on a huge dataset (COCO: 80 everyday classes) instead of random weights. We fine-tuned pretrained <code>yolo11n.pt</code> on thermal images. WHY: thermal faults need far fewer examples to learn when the network already "knows" edges, textures and objectness — training is faster and needs less data.</td></tr>
+<tr><td><b>Object tracking (ByteTrack)</b></td><td>Detection works per-frame. Tracking links detections across video frames so the same physical fault keeps the same <b>track ID</b>. Ultralytics has ByteTrack built in; we call <code>model.track(persist=True)</code> — persist keeps tracker memory between frames. Used in <code>src/pipelines/video.py</code>.</td></tr>
+</table>
+
+<h3>3.3 Training vocabulary</h3>
+<table>
+<tr><th style="width:22%">Term</th><th>Explanation</th></tr>
+<tr><td><b>Dataset split</b></td><td>Train (the model learns from it), Validation (checkpoint metrics during training), Test (final honest exam, touched once). Our split: <span class="num">6,924 / 400 / 15</span> images. WHY a test set: measuring on training data is like grading a student on the homework they memorised — the score would be meaningless.</td></tr>
+<tr><td><b>Epoch</b></td><td>One full pass over the training set. We trained <b>10 epochs</b>.</td></tr>
+<tr><td><b>Batch size</b></td><td>Images processed together before weights update. We used <b>batch 8</b>. Bigger batches need more RAM; this laptop has 7.4 GB.</td></tr>
+<tr><td><b>Learning rate</b></td><td>Step size for weight updates. Too high → training oscillates/diverges; too low → painfully slow. Ultralytics picked a sensible schedule; you can see it decay in <code>docs/assets/training_results.csv</code>.</td></tr>
+<tr><td><b>Loss function</b></td><td>The number training tries to minimise: how wrong the predictions are. YOLO sums three parts: <b>box loss</b> (are the rectangles in the right place?), <b>classification loss</b> (are the labels right?), <b>DFL loss</b> (distribution focal loss — refined box-edge quality). All three decrease across our 10 epochs.</td></tr>
+<tr><td><b>Backpropagation / optimizer</b></td><td>Backprop computes how much each weight contributed to the loss; the optimizer (SGD/AdamW family) nudges weights the other way. Repeat millions of times. (Concept-level answer is enough.)</td></tr>
+<tr><td><b>Overfitting</b></td><td>The model memorises training images but fails on new ones. Symptom: training loss keeps dropping while <i>validation</i> metrics stall or fall. Our validation mAP rose every epoch — no overfitting within these 10 epochs.</td></tr>
+<tr><td><b>Data augmentation</b></td><td>Randomised copies of training images (flips, crops, colour shifts) so the model sees variety and generalises better. Ultralytics applies it automatically. NOTE the separate dataset issue in Part 5: this dataset already <i>contains</i> augmented near-duplicates — a different thing, and a metrics risk.</td></tr>
+<tr><td><b>Random seed</b></td><td>A fixed number (we used <b>seed 42</b>) that makes random choices reproducible, so re-running training gives (nearly) the same result. Interviewers ask "how would someone reproduce your run?" — seed + pinned library versions + dataset version 49.</td></tr>
+<tr><td><b>imgsz (image size)</b></td><td>Network input resolution. We trained at <b>320 px</b> (not the dataset's native 640) because CPU training time roughly quadruples when you double the side length. Trade-off: small distant faults may be harder at 320.</td></tr>
+<tr><td><b>Checkpoint / best.pt</b></td><td>A snapshot of weights. Ultralytics saves <code>best.pt</code> = the checkpoint with the best validation fitness. We copied it to <code>models/best.pt</code> — the single file the app loads.</td></tr>
+</table>
+
+<h3>3.4 Evaluation vocabulary (the metrics that decide your grade)</h3>
+<table>
+<tr><th style="width:22%">Term</th><th>Explanation</th></tr>
+<tr><td><b>IoU — Intersection over Union</b></td><td>Overlap between predicted box and true box, 0–1. IoU = area of overlap ÷ area of union. A prediction "counts" as correct only if IoU ≥ the threshold (0.50 for mAP50).</td></tr>
+<tr><td><b>Precision</b></td><td>Of the boxes the model drew, how many were real? precision = TP / (TP + FP). High precision = few false alarms. Our overall test precision: <span class="num">0.692</span>.</td></tr>
+<tr><td><b>Recall</b></td><td>Of the real faults, how many did the model find? recall = TP / (TP + FN). High recall = few missed faults. Our overall test recall: <span class="num">0.762</span>.</td></tr>
+<tr><td><b>TP / FP / FN</b></td><td>True positive (correct box), false positive (box on nothing / wrong class), false negative (real fault missed). Everything in detection metrics is built from these three counts.</td></tr>
+<tr><td><b>AP — Average Precision</b></td><td>The area under the precision-vs-recall curve for one class: a single number summarising the precision/recall trade-off at all thresholds.</td></tr>
+<tr><td><b>mAP50</b></td><td>Mean AP across classes at IoU 0.50. Our test mAP50: <span class="num">0.641</span>. This is the headline number of the project.</td></tr>
+<tr><td><b>mAP50-95</b></td><td>Mean AP averaged over IoU thresholds 0.50, 0.55, …, 0.95 — rewards <i>precise</i> boxes, not just found boxes. Harder to score high. Ours: <span class="num">0.541</span> on test.</td></tr>
+<tr><td><b>Confusion matrix</b></td><td>A grid: rows = true class, columns = predicted class. Diagonal = correct. Off-diagonal cells reveal which classes get mixed up (e.g. SingleDiode vs SingleHotSpot). Saved: <code>docs/assets/confusion_matrix.png</code>.</td></tr>
+<tr><td><b>PR curve</b></td><td>Precision-vs-recall plot per class; the closer it hugs the top-right corner, the better. Saved: <code>docs/assets/pr_curves.png</code>.</td></tr>
+<tr><td><b>F1 score</b></td><td>The balance point of precision and recall: F1 = 2PR/(P+R). Useful one-liner when an interviewer wants a single number per class.</td></tr>
+</table>
+
+<h3>3.5 Web-app, database and tools vocabulary</h3>
+<table>
+<tr><th style="width:22%">Term</th><th>Explanation</th></tr>
+<tr><td><b>Streamlit</b></td><td>A Python framework that turns scripts into web apps — no HTML/JavaScript needed. It <b>re-runs your script top-to-bottom on every interaction</b> (a "rerun"), which is why caching matters (below). App entry point: <code>app.py</code>.</td></tr>
+<tr><td><b>st.cache_resource</b></td><td>Decorator that loads something ONCE per process and shares it across all user sessions. We cache the YOLO model with it — otherwise every visitor would reload the 5.4 MB weights (seconds of waiting).</td></tr>
+<tr><td><b>Session state</b></td><td>Streamlit memory per visitor that survives reruns (e.g. remembering the last analysis result).</td></tr>
+<tr><td><b>PostgreSQL</b></td><td>A battle-tested open-source relational database. Data lives in <b>tables</b> (like spreadsheets with strict column types).</td></tr>
+<tr><td><b>SQL</b></td><td>The language of relational databases: <code>INSERT</code> (save), <code>SELECT</code> (read), <code>DELETE</code>, etc. In this project SQL appears only in <code>supabase/schema.sql</code>; the app talks to the database over an API instead.</td></tr>
+<tr><td><b>Supabase</b></td><td>A hosted Postgres service with a ready-made REST API, so Python code never writes raw SQL — it calls <code>.table("inspections").insert(...)</code> via the <code>supabase-py</code> client. Free tier is enough for a demo. This is a portfolio-app classic because it needs no server of your own.</td></tr>
+<tr><td><b>REST API / PostgREST</b></td><td>Every table automatically gets HTTP endpoints. The anon key in the app identifies the request as "anonymous visitor".</td></tr>
+<tr><td><b>Row Level Security (RLS)</b></td><td>Database-side rules about which rows each key may read/write. WHY it matters: anyone could extract the anon key from the app, so the <i>database itself</i> must limit what that key can do. Our schema enables RLS and adds permissive anon policies (insert/select/delete) — appropriate for a demo with no user accounts; a real product would tie policies to authenticated users.</td></tr>
+<tr><td><b>Primary key / UUID</b></td><td>A unique row identifier. We use auto-generated UUIDs for <code>inspections.id</code> and <code>detections.id</code>.</td></tr>
+<tr><td><b>Foreign key + cascade</b></td><td><code>detections.inspection_id</code> points at <code>inspections.id</code>. <code>ON DELETE CASCADE</code>: deleting an inspection automatically deletes its detections — no orphan rows.</td></tr>
+<tr><td><b>Index</b></td><td>A lookup structure that makes specific queries fast (like a book index). We add three: <code>created_at desc</code> (newest-first history), <code>inspection_id</code> (drill-down lookups), <code>class_name</code> (charts by fault type).</td></tr>
+<tr><td><b>CSV</b></td><td>Comma-separated values — the universal export format. History screen exports the filtered table; report data is produced with pandas.</td></tr>
+<tr><td><b>pytest</b></td><td>Python's standard test framework. Tests are small programs that check units of code automatically. Ours: <b>33 tests, all passing in ~2.5 s</b>.</td></tr>
+<tr><td><b>Test double (fake/mock)</b></td><td>A stand-in object replacing a real dependency (like the database) so tests run offline and instantly. Our <code>tests/conftest.py</code> fakes the Supabase fluent API (chains like <code>.table().insert().execute()</code>).</td></tr>
+<tr><td><b>Smoke test</b></td><td>A minimal "does it even start?" check. Two Streamlit <code>AppTest</code> smoke tests boot the app and assert the screen-picker radio exists (found by label <code>"Screen"</code>).</td></tr>
+<tr><td><b>CI (Continuous Integration)</b></td><td>A robot that re-runs checks (dependencies sanity, import check, tests) on every push. GitHub Actions workflow: <code>.github/workflows/ci.yml</code>; run the same steps locally with <code>scripts/ci_local.sh</code>.</td></tr>
+<tr><td><b>Docker</b></td><td>Packages app + dependencies into a <b>container image</b> that runs identically anywhere. <code>Dockerfile</code> = recipe (python:3.11-slim base, install requirements, healthcheck on Streamlit's <code>/_stcore/health</code> endpoint); <code>docker-compose.yml</code> = one-command runner.</td></tr>
+<tr><td><b>Git</b></td><td>Version control — a time machine for code. <code>git commit</code> snapshots the project. This repo is on branch <code>main</code>.</td></tr>
+<tr><td><b>Environment (conda)</b></td><td>An isolated Python installation so project dependencies do not clash with the system. This project uses conda env <code>solarsight</code> (Python 3.11.16) because the system Python 3.14 is not supported by torch yet.</td></tr>
+</table>
+
+<!-- ================= PART 4 ================= -->
+<h2 class="pagebreak">4. Architecture — how the pieces fit</h2>
+
+<div class="diagram"><pre>
+                ┌──────────────────────────────────────────────────┐
+                │                    Browser                       │
+                │   Upload screen                History screen    │
+                └───────────────┬──────────────────┬───────────────┘
+                                │                  │
+                    ┌───────────▼──────────────────▼───────────┐
+                    │              app.py (Streamlit)          │
+                    │   sidebar → pick screen → render()       │
+                    └───────┬─────────────────────────┬────────┘
+                            │                         │
+             ┌──────────────▼───────────┐   ┌─────────▼──────────────┐
+             │  src/pipelines/          │   │  src/screens/history   │
+             │   detection.py           │   │  filters, charts, CSV  │
+             │   load_model() ← yolo11  │   └─────────┬──────────────┘
+             │   model(image)→boxes     │             │
+             │   video.py (ByteTrack)   │             │
+             └──────────────┬───────────┘             │
+                            │  list[Detection]        │
+             ┌──────────────▼───────────┐   ┌─────────▼──────────────┐
+             │  src/ui/draw.py          │   │  src/database/db.py    │
+             │  boxes on the image      │   │  ALL Supabase calls    │
+             │  results_table, export   │   │  InspectionsDB(client) │
+             └──────────────────────────┘   └─────────┬──────────────┘
+                                                      │ HTTPS + anon key
+                                           ┌──────────▼──────────────┐
+                                           │  Supabase (Postgres)    │
+                                           │  inspections + detections│
+                                           │  indexes + RLS policies │
+                                           └─────────────────────────┘
+</pre></div>
+
+<h3>Life of an upload (follow the data)</h3>
+<ol>
+  <li>Inspector enters a <b>site name</b> in the sidebar and uploads a thermal image.</li>
+  <li><code>src/screens/upload.py</code> checks the file type; the model is already loaded once per process
+      (via <code>@st.cache_resource</code> → <code>load_model()</code> in <code>src/pipelines/detection.py</code> — the only file allowed to import ultralytics).</li>
+  <li>The image runs through the model; raw results are converted into a list of
+      <code>Detection</code> objects (a frozen dataclass: class_name, confidence, x1, y1, x2, y2, track_id).</li>
+  <li>Detections below the confidence threshold (default <b>0.40</b>) are filtered out (inclusive: 0.40 stays).</li>
+  <li>For video, detections are deduplicated per track (<code>dedupe_by_track</code>) so one fault = one row, not one row per frame.</li>
+  <li><code>src/ui/draw.py</code> draws labelled boxes on the image; <code>components/results_table.py</code> renders the table.</li>
+  <li>On "Save inspection": <code>database/db.py::save_inspection()</code> inserts one <code>inspections</code>
+      row, then the <code>detections</code> rows. If secrets are missing, the section degrades gracefully
+      (<code>is_configured()</code> shows a setup notice instead of crashing).</li>
+  <li>The History screen reads rows back through the same <code>db.py</code>, filters in Postgres,
+      aggregates chart counts, and exports CSV.</li>
+</ol>
+
+<h3>Why the code is split this way (asked constantly!)</h3>
+<table>
+<tr><th>Module</th><th>Responsibility</th><th>Why separate</th></tr>
+<tr><td><code>src/config.py</code></td><td>Paths, thresholds, class list</td><td>Single source of truth — change 0.40 once, everywhere updates.</td></tr>
+<tr><td><code>src/pipelines/detection.py</code></td><td>Model loading + inference + filtering</td><td>The only ultralytics import; UI never touches YOLO directly.</td></tr>
+<tr><td><code>src/pipelines/video.py</code></td><td>Frame-by-frame tracking + summarising</td><td>Video logic is complex; keeping it out of screens keeps both testable.</td></tr>
+<tr><td><code>src/database/db.py</code></td><td>Every Supabase call</td><td>Swap/mock the DB in one place; tests inject a fake client (dependency injection).</td></tr>
+<tr><td><code>src/ui/draw.py</code>, <code>components/*</code></td><td>Boxes, tables, CSV export</td><td>Pure presentation — no model or DB knowledge.</td></tr>
+<tr><td><code>src/screens/*</code></td><td>Page layouts and user flow</td><td>Compose the pieces; stay thin.</td></tr>
+<tr><td><code>training/*</code></td><td>Download, train, evaluate</td><td>One-time/offline work, kept out of the app entirely.</td></tr>
+<tr><td><code>tests/</code></td><td>33 automated checks</td><td>Confidence to change code without breaking it.</td></tr>
+</table>
+<div class="box why"><b>WHY this matters in interviews:</b> this is a <i>layered architecture</i>
+(UI → pipelines → database). Each layer depends only on the one below. That is what makes the 33 tests
+possible: the database layer can be faked, the model layer can be faked, and the UI can be smoke-tested
+without a GPU, without internet, and without secrets.</div>
+
+<!-- ================= PART 5 ================= -->
+<h2>5. The dataset — what we trained on</h2>
+<table>
+<tr><th style="width:34%">Fact</th><th>Value</th></tr>
+<tr><td>Source</td><td>Kaggle dataset <code>pkdarabi/solarpanel</code> — "Thermal Solar PV Anomaly Detection Dataset" (ThermoSolar-PV), version 49.</td></tr>
+<tr><td>Download method</td><td><code>kagglehub==1.0.2</code> — anonymous, no Kaggle account needed. Script: <code>training/download_data.py</code>.</td></tr>
+<tr><td>License</td><td><b>CC BY-NC 4.0</b> — free for non-commercial use with attribution. (Interview question! It means this demo/portfolio use is fine; selling it would not be.)</td></tr>
+<tr><td>Images</td><td><span class="num">7,339</span> JPGs, all pre-sized <span class="num">640×640</span>, thermal (infrared) captures.</td></tr>
+<tr><td>Splits</td><td>train <span class="num">6,924</span> · valid <span class="num">400</span> · test <span class="num">15</span> images.</td></tr>
+<tr><td>Boxes (labels)</td><td>train <span class="num">19,845</span> · valid <span class="num">1,119</span> · test <span class="num">31</span> boxes.</td></tr>
+<tr><td>Classes</td><td><b>8</b> fault classes (list in Part 2), ids 0–7 exactly as in <code>src/config.py::CLASS_NAMES</code>.</td></tr>
+<tr><td>Format</td><td>YOLO format: one <code>.txt</code> per image, each line <code>class_id x_center y_center width height</code> (normalised 0–1).</td></tr>
+<tr><td>Missing in test</td><td>3 of 8 classes have zero ground-truth boxes in the 15 test images: <code>MultiByPassed</code>, <code>StringOpenCircuit</code>, <code>StringReversedPolarity</code>.</td></tr>
+</table>
+
+<div class="box warn"><b>HONEST — the augmentation trap:</b> the dataset contains roughly
+<b>3 augmented near-duplicate versions of each source image</b>, and they are spread <i>across</i>
+train/valid/test. That means the test set is not fully independent: the model has seen near-identical
+images during training. Effect: our metrics are <b>optimistic</b> (inflated). We report this caveat next to
+every number instead of hiding it. A proper fix would be re-splitting by source image — listed in the roadmap.</div>
+
+<div class="box why"><b>WHY 15 test images is a problem:</b> 31 boxes across 15 images means each class is
+represented by only a handful of boxes. One extra miss moves a class's recall by a big jump — the per-class
+numbers are statistically fragile. Say this out loud in interviews; it shows you understand measurement,
+not just buttons.</div>
+
+<!-- ================= PART 6 ================= -->
+<h2>6. Training — what actually happened</h2>
+<p>The full honest write-up lives in <code>docs/TRAINING.md</code>. The essentials:</p>
+<table>
+<tr><th style="width:40%">Setting</th><th>Value &amp; reason</th></tr>
+<tr><td>Model</td><td>YOLO11n (<code>models/yolo11n.pt</code>), COCO-pretrained → transfer learning. Smallest/fastest of the family — the realistic choice for CPU-only hardware and a 5.4 MB deployable file.</td></tr>
+<tr><td>Epochs / imgsz / batch / workers</td><td><b>10 / 320 / 8 / 2</b>. Chosen for this machine: no GPU, 8-core i3-1215U, 7.4 GB RAM. Actual wall time: <b>~94 minutes</b>.</td></tr>
+<tr><td>Device</td><td><code>cpu</code> (auto-detected; <code>training/train_yolo.py</code> prints it). torch 2.14.0+cpu build.</td></tr>
+<tr><td>Seed</td><td><b>42</b> — reproducibility.</td></tr>
+<tr><td>Output</td><td><code>runs/detect/runs/solar/train/</code> → best weights copied to <code>models/best.pt</code> (5.4 MB). Learning curve saved to <code>docs/assets/training_results.csv</code>.</td></tr>
+</table>
+
+<h3>The real learning curve (validation mAP50 per epoch)</h3>
+<pre>
+epoch    1     2     3     4     5     6     7     8     9     10
+mAP50  .127  .195  .267  .327  .360  .442  .453  .515  .516  .554
+</pre>
+<ul>
+  <li>Steady climb, no plateau, no collapse → the model was still improving when we stopped.</li>
+  <li>mAP50-95 reached <span class="num">0.368</span> at epoch 10.</li>
+  <li>Training losses (box/cls/dfl) all decreased monotonically.</li>
+</ul>
+<div class="box why"><b>WHY only 10 epochs?</b> Time budget on CPU: ~9 min/epoch at 320 px. 10 epochs was
+enough to prove the pipeline works end-to-end and produce a useful model. The curve says more epochs would
+help — that run is documented for a free GPU via <code>training/colab_train_gpu.ipynb</code>
+(640 px, 60 epochs, T4). <b>This notebook was NOT run</b> — say so if asked.</div>
+
+<div class="box tip"><b>TIP — the classic question: "Why not train at 640 like the dataset?"</b>
+Answer: compute cost. Doubling the side length roughly quadruples the pixels per image, and CPU epochs were
+already ~9 minutes at 320. I chose a working 320 px model now + a documented GPU path to 640 later, and I
+report the metrics that the shipped 320 px model actually achieves.</div>
+
+<!-- ================= PART 7 ================= -->
+<h2>7. Evaluation — reading the numbers honestly</h2>
+<p>Produced by <code>training/evaluate.py --conf 0.40</code> on the untouched test split, using the exact
+shipped <code>models/best.pt</code>. Artifacts: <code>docs/assets/evaluation_metrics.{md,csv}</code>,
+<code>confusion_matrix.png</code>, <code>confusion_matrix_raw.png</code>, <code>pr_curves.png</code>,
+<code>predictions_grid.png</code>, plus 4 annotated sample predictions (<code>docs/assets/samples/</code>,
+real confidences 0.40–0.73 from <code>scripts/run_samples.py --count 4</code>).</p>
+
+<h3>Overall test results</h3>
+<table>
+<tr><th>precision</th><th>recall</th><th>mAP50</th><th>mAP50-95</th></tr>
+<tr><td><b>0.692</b></td><td><b>0.762</b></td><td><b>0.641</b></td><td><b>0.541</b></td></tr>
+</table>
+
+<h3>Per-class results</h3>
+<table>
+<tr><th>class</th><th>precision</th><th>recall</th><th>mAP50</th><th>mAP50-95</th></tr>
+<tr><td>MultiByPassed</td><td>—</td><td>—</td><td>—</td><td>— <span class="small">(absent from test GT)</span></td></tr>
+<tr><td>MultiDiode</td><td>1.000</td><td>1.000</td><td><b>0.995</b></td><td>0.895</td></tr>
+<tr><td>MultiHotSpot</td><td>0.583</td><td>1.000</td><td>0.820</td><td>0.690</td></tr>
+<tr><td>SingleByPassed</td><td>0.909</td><td>0.909</td><td>0.848</td><td>0.685</td></tr>
+<tr><td>SingleDiode</td><td>0.800</td><td>0.400</td><td>0.375</td><td>0.300</td></tr>
+<tr><td>SingleHotSpot</td><td>0.167</td><td>0.500</td><td><b>0.165</b></td><td>0.132</td></tr>
+<tr><td>StringOpenCircuit</td><td>—</td><td>—</td><td>—</td><td>— <span class="small">(absent)</span></td></tr>
+<tr><td>StringReversedPolarity</td><td>—</td><td>—</td><td>—</td><td>— <span class="small">(absent)</span></td></tr>
+</table>
+
+<h3>How to tell this story in an interview (60 seconds)</h3>
+<ol>
+  <li><b>Headline:</b> "Test mAP50 is 0.641 with a 5.4 MB model running at 76 ms/image on a laptop CPU."</li>
+  <li><b>Best classes:</b> "MultiDiode is near-perfect (0.995); SingleByPassed and MultiHotSpot are solid (0.85 / 0.82)."</li>
+  <li><b>Weak classes:</b> "SingleHotSpot is weak (0.165) — few test instances, visually subtle, and precision 0.167 means most of its predictions are false positives. SingleDiode has the opposite profile: precise (0.80) but missing half the instances (recall 0.40)."</li>
+  <li><b>Missing classes:</b> "Three classes have no ground truth in the 15-image test split, so their metrics are undefined — I print '—', never 0. A 0 would claim the model failed a test it never took."</li>
+  <li><b>Caveat:</b> "The dataset's augmented near-duplicates leak across splits, so these numbers are optimistic. Fix on the roadmap: re-split by source image."</li>
+</ol>
+<div class="box warn"><b>HONEST — a real bug we hit (great interview story):</b> the first version of
+<code>evaluate.py</code> crashed with an IndexError. Ultralytics orders per-class metric arrays by
+<i>position among classes present in the split</i> (<code>metrics.box.ap_class_index</code>), not by global
+class id — so <code>result[3]</code> is NOT necessarily class 3. Fixed by mapping
+<code>present.index(class_id)</code>. Lesson: never assume library internals; read the arrays' own index   metadata.</div>
+
+<!-- ================= PART 8 ================= -->
+<h2>8. Inside the app — module by module</h2>
+
+<h3><code>app.py</code> — entry point (~30 lines)</h3>
+<p>Sets the page config (title, ☀️ icon, wide layout), renders the sidebar, then imports and calls the
+chosen screen. Screens are imported <i>inside</i> the branch so a History visit never pays the cost of
+importing upload machinery, and vice versa.</p>
+
+<h3><code>src/config.py</code> — one source of truth</h3>
+<ul>
+  <li><code>MODEL_PATH</code> = <code>models/best.pt</code>; <code>DATA_DIR</code> = <code>data/</code>.</li>
+  <li><code>DEFAULT_CONF_THRESHOLD = 0.40</code> (filter is inclusive — 0.40 passes).</li>
+  <li><code>DEFAULT_IOU_THRESHOLD = 0.45</code> for inference-time NMS (ultralytics default is 0.7; 0.45 keeps close-together faults from being merged).</li>
+  <li><code>CLASS_NAMES</code>: the 8 classes, list index = trained class id.</li>
+  <li>Accepted image / video extensions.</li>
+</ul>
+
+<h3><code>src/pipelines/detection.py</code> — the model seam</h3>
+<ul>
+  <li><code>Detection</code>: frozen dataclass = one fault (class_name, confidence, box, optional track_id). Frozen = immutable = safe to pass around.</li>
+  <li><code>load_model()</code>: the ONLY place importing ultralytics. UI code depends on this seam, so tests can inject fakes.</li>
+  <li><code>results_to_detections()</code>: converts ultralytics results into <code>Detection</code>s. Duck-typed and <code>boxes=None</code>-safe (frames with no detections happen).</li>
+  <li>Filtering by confidence (≥ threshold), and <code>dedupe_by_track()</code> for video.</li>
+</ul>
+
+<h3><code>src/pipelines/video.py</code> — tracking</h3>
+<ul>
+  <li><code>iter_video_detections()</code>: a Python <i>generator</i> that yields (frame, detections) per frame using <code>model.track(persist=True)</code> — ByteTrack keeps track IDs stable across frames.</li>
+  <li><code>summarize_tracks()</code>: collapses per-frame detections into one entry per track id, with the max confidence seen.</li>
+  <li>WHY dedupe: without it, a 10-second clip of one faulty panel would save hundreds of duplicate rows.</li>
+</ul>
+
+<h3><code>src/database/db.py</code> — the only file that knows Supabase exists</h3>
+<ul>
+  <li><code>InspectionsDB(client)</code>: the client is <b>injected</b> (passed in). Production passes the real client; tests pass a fake. This is dependency injection — expect that exact phrase in interviews.</li>
+  <li><code>is_configured()</code>: checks secrets exist, never raises → the UI can degrade gracefully.</li>
+  <li><code>save_inspection()</code>: one parent <code>inspections</code> row + bulk <code>detections</code> insert. Empty detections list = valid no-op (PostgREST rejects empty bulk inserts; zero faults is a legitimate finding).</li>
+  <li>Reads: <code>list_inspections()</code> filters with <code>.eq()</code> <b>in Postgres</b> (not in Python — pull only the rows you show), newest first via index on <code>created_at</code>; <code>fault_counts()</code> aggregates per class in Python with a Counter (documented trade-off: PostgREST GROUP BY needs an RPC; row counts are tiny); <code>distinct_sites()</code> feeds the filter dropdown.</li>
+  <li><code>detection_row()</code>: maps a <code>Detection</code> to table columns — kept separate so it is unit-testable alone.</li>
+</ul>
+<div class="box warn"><b>HONEST:</b> <code>save_inspection()</code> is "transactional-ish": PostgREST has no
+client-side transactions, so if the detections insert failed after the parent row was written, the parent
+would remain. Documented in TESTING.md. (Also: with no Supabase keys on this machine, the save/history
+round-trip has <b>not</b> been exercised live — it is covered by 33 offline tests with a fake client.)</div>
+
+<h3><code>src/screens/upload.py</code> &amp; <code>history.py</code></h3>
+<ul>
+  <li>Upload: image flow (predict → draw → table → save section) and video flow (track → summarise → save). Model cached with <code>@st.cache_resource</code> — loaded once per process, shared across sessions.</li>
+  <li>History: filters (site/media type) applied in the database, line chart + bar chart of fault counts, drill-down into one inspection, CSV export via <code>components/export.py</code>, delete-inspection support (cascade removes detections).</li>
+</ul>
+
+<h3>Streamlit mechanics worth explaining</h3>
+<ul>
+  <li><b>Rerun model:</b> every widget click re-executes the script top-to-bottom. That is why the model is cached and results are kept in session state.</li>
+  <li><b>cache_resource vs cache_data:</b> <i>resource</i> = one shared object (the model); <i>data</i> = cache keyed by arguments (dataframes).</li>
+  <li><b>Secrets:</b> <code>.streamlit/secrets.toml</code> (gitignored) holds <code>SUPABASE_URL</code> / <code>SUPABASE_KEY</code>; a committed <code>secrets.toml.example</code> documents the shape.</li>
+</ul>
+
+<!-- ================= PART 9 ================= -->
+<h2>9. The database — Supabase &amp; PostgreSQL</h2>
+
+<h3><code>inspections</code> — one row per analysis run</h3>
+<table>
+<tr><th>Column</th><th>Type</th><th>Meaning</th></tr>
+<tr><td><code>id</code></td><td>uuid PK</td><td>auto UUID, the drill-down key</td></tr>
+<tr><td><code>site_name</code></td><td>text NOT NULL</td><td>user-entered site label (filterable)</td></tr>
+<tr><td><code>source_filename</code></td><td>text NOT NULL</td><td>original file name</td></tr>
+<tr><td><code>media_type</code></td><td>text</td><td>'image' or 'video' (CHECK constraint)</td></tr>
+<tr><td><code>model_version</code></td><td>text NOT NULL</td><td>which weights produced it — provenance!</td></tr>
+<tr><td><code>created_at</code></td><td>timestamptz</td><td>defaults to now(); indexed DESC for history</td></tr>
+<tr><td><code>total_faults</code></td><td>integer</td><td>denormalised count for instant listing</td></tr>
+</table>
+
+<h3><code>detections</code> — one row per found fault</h3>
+<table>
+<tr><th>Column</th><th>Type</th><th>Meaning</th></tr>
+<tr><td><code>id</code></td><td>uuid PK</td><td>auto UUID</td></tr>
+<tr><td><code>inspection_id</code></td><td>uuid FK → inspections</td><td><code>ON DELETE CASCADE</code></td></tr>
+<tr><td><code>class_name</code></td><td>text</td><td>fault class (indexed for charts)</td></tr>
+<tr><td><code>confidence</code></td><td>double precision</td><td>0–1, enforced by CHECK</td></tr>
+<tr><td><code>x1,y1,x2,y2</code></td><td>double precision</td><td>box corners in pixels</td></tr>
+<tr><td><code>track_id</code></td><td>integer NULL</td><td>set for video only, NULL for images</td></tr>
+</table>
+
+<h3>Design decisions to narrate</h3>
+<ul>
+  <li><b>Metadata only — no images stored.</b> Keeps the DB small and avoids storage/privacy issues; the upload is analysed in memory and discarded.</li>
+  <li><b>Cascade delete</b> = no orphan detection rows ever.</li>
+  <li><b>Three indexes</b>, each serving one real query: newest-first history; per-inspection drill-down; per-class chart aggregation.</li>
+  <li><b>RLS on both tables</b> with anon policies. WHY: the anon key ships with the app, and Supabase also auto-exposes a REST API — without RLS the tables would be readable by anyone. Policies currently allow anon insert/select/delete (a demo trade-off); a production system would scope rows to authenticated users.</li>
+  <li><b>CHECK constraints</b> (<code>media_type</code>, confidence bounds) — the DB defends itself against bad data even if app code has a bug.</li>
+</ul>
+<div class="box tip"><b>TIP — "Why Supabase and not SQLite/MySQL/Firebase?"</b> SQLite: file-based, not
+shareable across users/machines, no API or security layer. MySQL: fine, but Supabase gives hosted Postgres
+<b>plus</b> a ready REST API and RLS — zero server code. Firebase: NoSQL — poor fit for our relational
+inspection→detections shape and its SQL-friendly filters/charts.</div>
+
+<!-- ================= PART 10 ================= -->
+<h2>10. Testing &amp; CI — how we know it works</h2>
+<p><b>33 tests, all passing, ~2.5 seconds</b> (<code>pytest -q</code>). No GPU, no internet, no secrets required.</p>
+<h3>What the suite covers</h3>
+<ul>
+  <li><b>Config/paths:</b> class list matches the 8 dataset classes; thresholds sane.</li>
+  <li><b>Detection pipeline:</b> threshold filtering (inclusive ≥), conversion from fake ultralytics results
+      (fakes mimic <code>.cpu().numpy()</code> — the real call chain), <code>boxes=None</code> safety, track dedupe.</li>
+  <li><b>Video:</b> track summarising keeps max confidence per track id.</li>
+  <li><b>Database layer:</b> a <code>FakeSupabaseClient</code> reproduces the fluent PostgREST chain
+      (`.table().insert().execute()`, `.eq()`, `.in_()`, `.order().limit()`), so every <code>db.py</code>
+      method is asserted offline — including a bug we found and fixed in the fake's <code>.in_()</code> filter during development (documented in TESTING.md).</li>
+  <li><b>UI smoke tests:</b> Streamlit <code>AppTest</code> boots the real app and asserts the screen-picker
+      radio exists — <b>located by label "Screen"</b>, not by index (the Upload screen adds its own
+      "Media type" radio, which broke index-based lookup; that failure and fix are documented).</li>
+  <li><b>Mapping:</b> <code>detection_row()</code> produces exactly the table's columns.</li>
+</ul>
+<h3>Failures we actually hit and fixed (TESTING.md lists all 8)</h3>
+<ol>
+  <li><code>sys.path</code> — training scripts couldn't import project modules when run from another directory.</li>
+  <li>Dataset double-nesting — kagglehub extracts an inner <code>ImageSet/</code>; naive copying nested it twice.</li>
+  <li>AppTest relative path — smoke test must launch <code>app.py</code> from the project root.</li>
+  <li>Fake Supabase <code>.in_()</code> filter returned wrong rows.</li>
+  <li>Missing imports in the detection module after a refactor.</li>
+  <li>Dead import in <code>upload.py</code> (lint found it).</li>
+  <li>The ultralytics per-class array ordering bug (Part 7).</li>
+<li><code>requirements.txt</code> pinned <code>opencv-python-headless==5.0.0</code>, a version that does not exist on PyPI (real release: <code>5.0.0.93</code>). It survived unnoticed because the original env already had opencv installed; a from-scratch install following BUILDING.md exposed it, and since pip is all-or-nothing the whole install aborted. Fix: correct pin + full re-verification.</li>
+</ol>
+<div class="box why"><b>WHY interviewers love this:</b> "tell me about a bug" is a standard question, and
+these are real, explained, fixed, regression-protected bugs — not memorised horror stories.</div>
+<h3>CI</h3>
+<p><code>.github/workflows/ci.yml</code> runs on every push: dependency sanity (<code>pip check</code>),
+import-the-app-without-secrets check, and pytest. <code>scripts/ci_local.sh</code> runs the identical steps
+locally — all steps pass on this machine.</p>
+
+<!-- ================= PART 11 ================= -->
+<h2>11. Docker &amp; deployment</h2>
+<h3>Docker in 5 sentences</h3>
+<ol>
+  <li>An <b>image</b> is a frozen snapshot: OS + Python + dependencies + your code.</li>
+  <li>A <b>container</b> is a running instance of that image.</li>
+  <li>A <b>Dockerfile</b> is the recipe; ours starts from <code>python:3.11-slim</code>, installs
+      <code>requirements.txt</code>, copies the app, and runs Streamlit on the container's port.</li>
+  <li>A <b>HEALTHCHECK</b> pings <code>/_stcore/health</code> (Streamlit's built-in endpoint, which returned
+      <code>ok</code> in our live run) so orchestrators know the app is actually alive.</li>
+  <li><b>docker-compose.yml</b> wraps the run command + env/secrets wiring into one <code>docker compose up</code>.</li>
+</ol>
+<div class="box warn"><b>HONEST:</b> Docker is <b>not installed on this machine</b>, so the image has
+<b>not been built</b>. The Dockerfile and compose file are provided but unverified — and the README/TESTING
+docs say exactly that. If asked: "I wrote the packaging and documented that it's unverified; building it was
+impossible in my environment, and I don't claim otherwise."</div>
+<h3>Deployment options to discuss</h3>
+<ul>
+  <li><b>Streamlit Community Cloud</b> — free, connects to the GitHub repo, but the 5.4 MB model must be in
+      the repo or fetched at runtime (gitignored today — decision needed before deploying).</li>
+  <li><b>Any VM + Docker</b> — the compose file becomes the deployment unit; Supabase stays as the shared database.</li>
+  <li><b>HF Spaces</b> — Docker-space hosting that also fits this layout.</li>
+</ul>
+
+<!-- ================= PART 12 ================= -->
+<h2>12. Roadmap — what comes next</h2>
+<p>Full version in <code>docs/roadmap.md</code>. The ordered short-list:</p>
+<ol>
+  <li><b>Live Supabase round-trip</b> — create the project, run <code>supabase/schema.sql</code>, paste
+      secrets, save and read back a real inspection (the one blocked manual step).</li>
+  <li><b>Re-split the dataset by source image</b> — kills the near-duplicate leakage; retrain and report
+      honest before/after metrics.</li>
+  <li><b>GPU training run</b> — 640 px / 60 epochs via the provided Colab notebook; expect a real mAP50 jump.</li>
+  <li><b>Docker build verification</b> — build and push the image once Docker is available.</li>
+  <li><b>Class-balancing experiments</b> — oversample weak classes (SingleHotSpot/SingleDiode) or tune per-class confidences.</li>
+  <li><b>Auth + multi-user RLS</b> — Supabase Auth, policies scoped to user ids, no more anon writes.</li>
+  <li><b>Model versioning</b> — record every training run (git hash, data version, metrics) so
+      <code>model_version</code> in the DB becomes a real lineage.</li>
+  <li><b>Batch folder upload + PDF report</b> — inspector-day ergonomics.</li>
+</ol>
+
+<!-- ================= PART 13 ================= -->
+<h2 class="pagebreak">13. Interview Q&amp;A bank (45 questions)</h2>
+<p class="small">Model answers, sized for spoken delivery. Numbers in brackets are the real measured values.</p>
+
+<h3>A. The project pitch</h3>
+<div class="qa"><p class="q">1. Explain this project in 60 seconds.</p>
+<p class="a">Solar panels develop faults that are invisible in daylight but glow in thermal images. Inspectors
+analyse those images by hand. SolarSight is a Streamlit web app: upload a thermal image or video, a fine-tuned
+YOLO11n model [5.4 MB] draws labelled boxes around 8 fault classes in [76 ms] on a CPU, and the inspection is
+saved to Supabase. A History screen shows past inspections with charts and CSV export. I built everything on a
+CPU-only laptop: dataset [7,339 images, Kaggle, CC BY-NC], training [10 epochs, ~94 min], evaluation [test
+mAP50 0.641], 33 passing tests, docs, and Docker packaging.</p></div>
+
+<div class="qa"><p class="q">2. Why is this worth building — doesn't the camera software already do it?</p>
+<p class="a">Camera tools flag hot pixels but rarely classify the fault type. Classification by class
+(diode vs bypass vs string fault) drives different maintenance actions. Also, a database of classified
+inspections turns one-off images into a queryable maintenance history — that's the part manual review
+never gives you.</p></div>
+
+<div class="qa"><p class="q">3. What was the hardest problem, and how did you solve it?</p>
+<p class="a">Two honest answers. Engineering: the ultralytics per-class metric arrays are ordered by position
+among classes <i>present</i> in the split, not by global class id — my evaluate script crashed with IndexError;
+fixed by indexing via <code>present.index(class_id)</code>. Methodology: the dataset's augmented near-duplicates
+leak across train/valid/test, inflating metrics — I can't fix the official split without breaking
+comparability, so I documented the caveat and put re-splitting on the roadmap.</p></div>
+
+<h3>B. Dataset questions</h3>
+<div class="qa"><p class="q">4. Where did the data come from and are you allowed to use it?</p>
+<p class="a">Kaggle <code>pkdarabi/solarpanel</code>, the ThermoSolar-PV anomaly dataset, version 49,
+license CC BY-NC 4.0 — non-commercial use with attribution. Fine for a portfolio project; not for a paid product.</p></div>
+<div class="qa"><p class="q">5. Describe the dataset.</p>
+<p class="a">7,339 thermal JPGs at 640×640, YOLO-format labels, official splits 6,924/400/15 with
+19,845/1,119/31 boxes, 8 fault classes. Three classes have no test ground truth.</p></div>
+<div class="qa"><p class="q">6. What is YOLO label format?</p>
+<p class="a">One .txt per image; each line: <code>class_id x_center y_center width height</code>, all
+coordinates normalised 0–1 relative to image size.</p></div>
+<div class="qa"><p class="q">7. Why is the test split a problem?</p>
+<p class="a">Two reasons: it's tiny (15 images, 31 boxes) so per-class numbers are fragile, and augmented
+near-duplicates of training images sit in it, so metrics are optimistic. Both are documented next to every
+reported number.</p></div>
+<div class="qa"><p class="q">8. How would you fix the leakage?</p>
+<p class="a">Group-level split: hash source-image IDs, assign all augmented versions of a source to the same
+split, retrain, report before/after. I'd expect metrics to drop — and that lower number would be the honest one.</p></div>
+<div class="qa"><p class="q">9. Is class imbalance an issue?</p>
+<p class="a">Yes — and it shows in results: well-represented, visually distinct classes like MultiDiode hit
+[0.995 mAP50] while SingleHotSpot [0.165] and SingleDiode [0.375] lag. Fixes: oversampling weak classes,
+per-class thresholds, more data.</p></div>
+
+<h3>C. Training questions</h3>
+<div class="qa"><p class="q">10. Walk me through your training run.</p>
+<p class="a">YOLO11n COCO-pretrained, fine-tuned 10 epochs at 320 px, batch 8, 2 workers, seed 42, on CPU
+[~94 min, torch 2.14.0+cpu]. Validation mAP50 climbed [0.127 → 0.554] every epoch with no plateau; best
+checkpoint exported to models/best.pt.</p></div>
+<div class="qa"><p class="q">11. Why nano? Why 320 px? Why 10 epochs?</p>
+<p class="a">All the same constraint: CPU-only hardware. Nano is the smallest YOLO11; 320 px is ~4× cheaper
+per image than 640; 10 epochs fit a ~90-minute budget and the still-rising curve shows the pipeline works.
+The scale-up path (640 px, 60 epochs, GPU) is scripted in colab_train_gpu.ipynb — not yet run.</p></div>
+<div class="qa"><p class="q">12. What is transfer learning and why use it?</p>
+<p class="a">Starting from weights pretrained on COCO and fine-tuning on thermal data. The early layers
+already encode edges/textures, so I need less data and less compute for good results.</p></div>
+<div class="qa"><p class="q">13. What is a loss, and what does YOLO's loss contain?</p>
+<p class="a">The training objective to minimise. YOLO: box regression loss (box placement), classification
+loss (label correctness), DFL (box-edge distribution quality). All three fell monotonically across my 10 epochs.</p></div>
+<div class="qa"><p class="q">14. How do you know it didn't overfit?</p>
+<p class="a">Validation mAP rose every epoch while training loss fell — no divergence. Also the test set was
+touched once, after training. True overfitting risk appears with longer training; that's when early stopping matters.</p></div>
+<div class="qa"><p class="q">15. What does seed 42 do?</p>
+<p class="a">Fixes the random number generator (weight init, augmentation, shuffling) so runs are reproducible.
+Combined with pinned dependency versions and dataset version 49, someone can approximately reproduce my run.</p></div>
+<div class="qa"><p class="q">16. How would you improve the model with one more week?</p>
+<p class="a">1) GPU run at 640 px / 60 epochs (scripted). 2) Leakage-free re-split, retrain, honest metrics.
+3) Tinker with augmentation and per-class sampling for the weak classes. 4) Conf-matrix-driven error analysis.</p></div>
+
+<h3>D. Evaluation questions</h3>
+<div class="qa"><p class="q">17. Explain mAP50 vs mAP50-95.</p>
+<p class="a">A detection counts as correct if its IoU with truth ≥ threshold. mAP50 uses 0.50 — "found it,
+roughly right place." mAP50-95 averages over thresholds 0.50–0.95 in 0.05 steps — rewards precise boxes.
+Mine: [0.641] vs [0.541]; the gap is normal, the stricter metric is always lower.</p></div>
+<div class="qa"><p class="q">18. Your precision is 0.692. What does that mean for a user?</p>
+<p class="a">Roughly 7 of 10 drawn boxes are real faults; 3 in 10 are false alarms the inspector dismisses.
+For an inspection-aid tool that's acceptable — humans verify; the model must not miss faults, so recall [0.762]
+matters more, and raising it is roadmap work.</p></div>
+<div class="qa"><p class="q">19. Why are three classes shown as "—" instead of 0?</p>
+<p class="a">They have zero ground-truth instances in the test split, so precision/recall/AP are undefined —
+there is nothing to be right or wrong about. Printing 0.0 would falsely assert "tested and failed."</p></div>
+<div class="qa"><p class="q">20. Why is SingleHotSpot bad, and what would you do?</p>
+<p class="a">[mAP50 0.165, precision 0.167, recall 0.500]. Few test boxes, small subtle hot regions easily
+confused with noise, and class imbalance. Actions: more data, oversampling, higher input resolution, error
+analysis on the confusion matrix.</p></div>
+<div class="qa"><p class="q">21. What do the confusion matrix and PR curves tell you?</p>
+<p class="a">Confusion matrix: diagonal = correct; off-diagonal shows which classes get swapped (visually
+similar diode vs hotspot variants). PR curves: per-class precision-recall trade-off; area under them = AP;
+curves hugging the top-right are healthy. Both are saved in docs/assets.</p></div>
+<div class="qa"><p class="q">22. Would you deploy this model?</p>
+<p class="a">As an assist tool, with disclosure: metadata-only metrics are optimistic due to dataset leakage;
+three classes were never tested; weak classes need a human check. As an autonomous decision system, no.</p></div>
+
+<h3>E. App &amp; software questions</h3>
+<div class="qa"><p class="q">23. Why Streamlit?</p>
+<p class="a">Pure-Python web UI — no JS — ideal for internal tools and demos. Trade-offs I accept and can
+name: full-script reruns on every interaction, limited styling, one process per app. Caching neutralises the
+rerun cost for the heavy model.</p></div>
+<div class="qa"><p class="q">24. Explain cache_resource vs cache_data.</p>
+<p class="a">cache_resource: one shared object across sessions — my model, loaded once per process.
+cache_data: memoises function outputs keyed by args — dataframes, downloads. Wrong choice = per-session reloads
+or shared mutable state bugs.</p></div>
+<div class="qa"><p class="q">25. What happens on each Streamlit interaction?</p>
+<p class="a">The script re-runs top to bottom; widgets keep their values; cached resources are reused;
+session_state preserves per-user results between reruns.</p></div>
+<div class="qa"><p class="q">26. Walk me through upload → saved inspection.</p>
+<p class="a">Sidebar sets site + thresholds → file uploaded → cached model predicts (or tracks video) →
+results become frozen Detection dataclasses → confidence filter [0.40 inclusive] → draw + table → Save:
+insert inspections row, bulk-insert detections rows → History can read it back.</p></div>
+<div class="qa"><p class="q">27. Why is all Supabase code in one file?</p>
+<p class="a">src/database/db.py is the database layer. One seam to mock in tests, one place to swap providers,
+no SQL/network calls scattered in UI code. The class takes an injected client — dependency injection.</p></div>
+<div class="qa"><p class="q">28. What is dependency injection and why here?</p>
+<p class="a">Instead of a function creating its own dependencies, they're passed in. InspectionsDB(client)
+gets a real Supabase client in production and a fake in tests — offline, instant, deterministic. 33 tests run
+in [~2.5 s] because of this.</p></div>
+<div class="qa"><p class="q">29. How does the app behave without Supabase configured?</p>
+<p class="a">is_configured() checks secrets without raising; the save section shows a setup notice instead of
+crashing. Detection still works — storage is optional by design. Tested in CI by importing the app with no secrets.</p></div>
+<div class="qa"><p class="q">30. How does video mode differ from image mode?</p>
+<p class="a">model.track(persist=True) adds ByteTrack tracking — stable track IDs across frames. Per-frame
+detections are deduplicated per track so one fault = one saved row (max confidence), not hundreds of frames.</p></div>
+<div class="qa"><p class="q">31. Why conf 0.40 and IoU 0.45?</p>
+<p class="a">0.40 balances missed faults vs false-alarm flood (chosen during evaluation; visible in the PR
+trade-off). NMS IoU 0.45 (vs ultralytics default 0.7) keeps close-together faults from being merged into one box.
+Both live in config.py, tunable live from the sidebar.</p></div>
+<div class="qa"><p class="q">32. What would break at 1,000 concurrent users?</p>
+<p class="a">Streamlit's model: one process, script reruns per interaction — it's an internal-tool framework.
+Fix path: real frontend + FastAPI inference service (batched), managed Postgres stays; model serving via
+TorchScript/ONNX or Triton. The layered code makes that extraction cheap — UI, pipelines, DB are already separate.</p></div>
+
+<h3>F. Database questions</h3>
+<div class="qa"><p class="q">33. Why a database at all?</p>
+<p class="a">Analyses must outlive the session and be queryable: filter by site, chart fault types over time,
+export CSV for reports. That's relational data — inspections 1—N detections.</p></div>
+<div class="qa"><p class="q">34. Why Supabase over SQLite/MySQL/Firebase?</p>
+<p class="a">SQLite: local file, no multi-user API. MySQL: fine DB, but Supabase adds hosted Postgres + instant
+REST API + RLS. Firebase: NoSQL, weak fit for relational filters/aggregations. For a portfolio app, zero
+server maintenance matters too.</p></div>
+<div class="qa"><p class="q">35. Explain the schema.</p>
+<p class="a">inspections: uuid PK, site_name, source_filename, media_type (CHECK image/video), model_version,
+created_at (indexed DESC), total_faults. detections: uuid PK, FK inspection_id ON DELETE CASCADE, class_name
+(indexed), confidence (CHECK 0–1), x1..y2, nullable track_id. Three indexes, each mapped to one real query.</p></div>
+<div class="qa"><p class="q">36. What is RLS and why do you need it with an anon key?</p>
+<p class="a">Row Level Security: rules evaluated per query inside Postgres defining which rows a role may touch.
+The anon key ships inside the app, so assume it leaks; without RLS, anyone could read/modify everything —
+and Supabase auto-exposes a REST API. My policies allow anon insert/select/delete (demo trade-off);
+production would scope rows to authenticated users.</p></div>
+<div class="qa"><p class="q">37. Why indexes on those three columns?</p>
+<p class="a">created_at DESC → History's newest-first list; inspection_id → drill-down lookups per inspection;
+class_name → fault-type chart aggregation. An index on an unused column is pure write cost — every index
+here maps to a query the app actually runs.</p></div>
+<div class="qa"><p class="q">38. Why store metadata and not the images?</p>
+<p class="a">DB rows stay tiny; no blob storage costs; no privacy burden of retaining site imagery; the upload
+is analysed in memory and discarded. If images were needed later: Supabase Storage + a URL column, not the DB.</p></div>
+<div class="qa"><p class="q">39. Your save isn't transactional — is that a problem?</p>
+<p class="a">Yes, a known one: PostgREST has no client-side transactions, so a failure between the parent
+insert and detections bulk-insert could leave a childless parent. Documented in TESTING.md. Fixes: a Postgres
+RPC function wrapping both inserts, or a cleanup job for orphan parents.</p></div>
+
+<h3>G. Testing &amp; process questions</h3>
+<div class="qa"><p class="q">40. What do your 33 tests cover and what not?</p>
+<p class="a">Covered: pipeline filtering/conversion, track dedupe/summaries, all db.py methods against a fake
+Supabase client, detection→row mapping, two AppTest smoke tests booting the real app. Not covered: the real
+network round-trip (no live Supabase on this machine) and real model accuracy inside the app (the model is
+evaluated separately offline). Saying what tests don't cover is part of testing honestly.</p></div>
+<div class="qa"><p class="q">41. Fake vs mock?</p>
+<p class="a">Both are test doubles. A mock asserts interactions (was this called?); a fake is a working
+lightweight implementation. My FakeSupabaseClient reproduces the fluent chain semantics, so tests assert
+behaviour, not call order.</p></div>
+<div class="qa"><p class="q">42. Tell me about a test that caught a real bug.</p>
+<p class="a">The AppTest smoke test failed when located by radio index — the Upload screen adds its own
+"Media type" radio when a model exists, shifting indices. Fix: locate by label "Screen". Lesson: UI
+locators should anchor on stable labels, not layout positions. Seven more documented in TESTING.md.</p></div>
+<div class="qa"><p class="q">43. What does CI do here?</p>
+<p class="a">GitHub Actions on every push: pip check (dependency sanity), import-the-app-without-secrets
+(proves graceful degradation), pytest. Same steps locally via scripts/ci_local.sh — all green on this machine.</p></div>
+
+<h3>H. Honest-limitations questions (they WILL ask)</h3>
+<div class="qa"><p class="q">44. What are you NOT claiming?</p>
+<p class="a">Precisely: (1) metrics are optimistic — augmented near-duplicates leak across splits;
+(2) three of eight classes have no test ground truth; (3) the Supabase round-trip is tested offline only —
+no live project yet; (4) the Docker image is written but never built (no Docker on this machine);
+(5) 10 epochs / 320 px is a proof-of-capability run — the 640 px GPU notebook is provided, not run;
+(6) parts of the codebase were AI-assisted; every claim in the docs traces to a run I executed.</p></div>
+<div class="qa"><p class="q">45. What would you do differently?</p>
+<p class="a">1) Re-split by source image from day one — it changes every reported number. 2) Start the
+Supabase project earlier so the full loop is exercised live. 3) Verify Docker in a VM. 4) Log per-class
+validation metrics during training to catch weak classes sooner.</p></div>
+
+<!-- ================= PART 14 ================= -->
+<h2>14. Known limitations — the honest list</h2>
+<table>
+<tr><th style="width:30%">Limitation</th><th>Detail</th><th>Status / fix</th></tr>
+<tr><td>Optimistic metrics</td><td>Augmented near-duplicates across splits (3 versions per source image)</td><td>Documented; re-split by source image on roadmap</td></tr>
+<tr><td>Untested classes</td><td>MultiByPassed, StringOpenCircuit, StringReversedPolarity absent from test GT</td><td>Shown as "—", never 0</td></tr>
+<tr><td>Weak classes</td><td>SingleHotSpot [0.165], SingleDiode [0.375] mAP50</td><td>Error analysis + rebalancing on roadmap</td></tr>
+<tr><td>Small model / short run</td><td>10 epochs @ 320 px on CPU</td><td>GPU notebook (640 px / 60 ep) provided, not run</td></tr>
+<tr><td>Supabase not exercised live</td><td>No project/keys on this machine; schema + graceful degradation + 33 offline tests exist</td><td>User manual step; blocked, documented</td></tr>
+<tr><td>Docker unverified</td><td>Docker not installed; Dockerfile + compose written, healthcheck on /_stcore/health</td><td>Documented as unverified in TESTING.md</td></tr>
+<tr><td>Non-transactional save</td><td>PostgREST client-side limit; orphan-parent risk</td><td>Documented; RPC-based fix identified</td></tr>
+<tr><td>Dataset license</td><td>CC BY-NC 4.0 — non-commercial only</td><td>Attribution in DATA.md/README</td></tr>
+<tr><td>AI-assisted build</td><td>Portions of the codebase were built with AI assistance</td><td>Disclosed in README; all claims trace to executed runs</td></tr>
+</table>
+
+<!-- ================= PART 15 ================= -->
+<h2>15. Cheat sheet — every number you must remember</h2>
+<div class="avoid">
+<table>
+<tr><th style="width:55%">Fact</th><th>Value</th></tr>
+<tr><td>Dataset images / size</td><td>7,339 · 640×640 thermal JPGs</td></tr>
+<tr><td>Splits (images / boxes)</td><td>6,924 / 400 / 15 — 19,845 / 1,119 / 31</td></tr>
+<tr><td>Classes</td><td>8 (3 absent from test GT)</td></tr>
+<tr><td>Test overall</td><td>P 0.692 · R 0.762 · mAP50 0.641 · mAP50-95 0.541</td></tr>
+<tr><td>Best / worst class (mAP50)</td><td>MultiDiode 0.995 · SingleHotSpot 0.165</td></tr>
+<tr><td>Valid mAP50 curve</td><td>epoch 1: 0.127 → epoch 10: 0.554 (mAP50-95 0.368)</td></tr>
+<tr><td>Training run</td><td>yolo11n · 10 ep · 320 px · batch 8 · seed 42 · CPU · ~94 min</td></tr>
+<tr><td>Model file</td><td>models/best.pt · 5.4 MB · conf 0.40 · IoU 0.45</td></tr>
+<tr><td>CPU speed</td><td>76 ms/image @640px (nano, measured)</td></tr>
+<tr><td>Tests</td><td>33 passing · ~2.5 s</td></tr>
+<tr><td>Stack versions</td><td>Python 3.11.16 · torch 2.14.0+cpu · ultralytics 8.4.165 · streamlit 1.64.0 · supabase 2.31.0 · opencv 5.0.0</td></tr>
+<tr><td>App check</td><td>GET /_stcore/health → ok (verified on :8601)</td></tr>
+<tr><td>Dataset license</td><td>CC BY-NC 4.0 · Kaggle pkdarabi/solarpanel v49</td></tr>
+</table>
+</div>
+
+<!-- ================= PART 16 ================= -->
+<h2>16. Glossary quick reference</h2>
+<table>
+<tr><th style="width:20%">Term</th><th style="width:26%">One-line definition</th><th>Where in this project</th></tr>
+<tr><td>YOLO11n</td><td>Smallest YOLO11 one-pass object detector</td><td>The model; trained to models/best.pt</td></tr>
+<tr><td>mAP50</td><td>Mean AP at IoU 0.50 across classes</td><td>Headline metric: 0.641 on test</td></tr>
+<tr><td>IoU</td><td>Box overlap = intersection ÷ union</td><td>Detection correctness + NMS threshold 0.45</td></tr>
+<tr><td>Precision / Recall</td><td>Boxes that were real / faults that were found</td><td>0.692 / 0.762 on test</td></tr>
+<tr><td>NMS</td><td>Drops duplicate overlapping boxes</td><td>Inside ultralytics inference</td></tr>
+<tr><td>Transfer learning</td><td>Fine-tune a pretrained model</td><td>COCO-pretrained yolo11n → thermal</td></tr>
+<tr><td>Epoch</td><td>One pass over training data</td><td>10 epochs, ~9 min each on CPU</td></tr>
+<tr><td>Overfitting</td><td>Memorising train, failing on new data</td><td>Not observed: valid mAP rose every epoch</td></tr>
+<tr><td>ByteTrack</td><td>Assigns stable IDs to objects across frames</td><td>Video pipeline, model.track(persist=True)</td></tr>
+<tr><td>Streamlit</td><td>Python→web-app framework, reruns script per interaction</td><td>The whole UI, app.py</td></tr>
+<tr><td>st.cache_resource</td><td>Load once per process, share across sessions</td><td>Model loading</td></tr>
+<tr><td>Supabase</td><td>Hosted Postgres + auto REST API + RLS</td><td>Inspections storage</td></tr>
+<tr><td>RLS</td><td>Per-row access rules enforced by the DB</td><td>Anon policies in schema.sql</td></tr>
+<tr><td>Foreign key / cascade</td><td>Child rows tied to parent; auto-deleted</td><td>detections → inspections</td></tr>
+<tr><td>Index</td><td>Structure that speeds specific queries</td><td>created_at, inspection_id, class_name</td></tr>
+<tr><td>pytest</td><td>Python test framework</td><td>33 tests in tests/</td></tr>
+<tr><td>Test fake</td><td>Working stand-in for a dependency</td><td>FakeSupabaseClient in conftest</td></tr>
+<tr><td>Dependency injection</td><td>Pass dependencies in instead of creating them</td><td>InspectionsDB(client)</td></tr>
+<tr><td>CI</td><td>Automated checks on every push</td><td>.github/workflows/ci.yml</td></tr>
+<tr><td>Docker image / container</td><td>Frozen app snapshot / running instance</td><td>Dockerfile, docker-compose.yml (unverified)</td></tr>
+<tr><td>HEALTHCHECK</td><td>Probe that the service is alive</td><td>GET /_stcore/health → ok</td></tr>
+<tr><td>CSV</td><td>Comma-separated table export</td><td>History screen export</td></tr>
+<tr><td>conda env</td><td>Isolated Python installation</td><td>solarsight (Python 3.11.16)</td></tr>
+<tr><td>seed</td><td>Fixed RNG start → reproducibility</td><td>42 in training</td></tr>
+</table>
+
+<p class="small" style="margin-top:24px; border-top: 1px solid #c6d2de; padding-top: 8px;">
+SolarSight — The Complete Beginner's Guide. Generated from the project's real artifacts
+(docs/, training outputs, test suite). Every metric was measured on the author's CPU-only machine; items not
+executed are labelled as such. Companion documents: README.md, docs/DATA.md, TRAINING.md, TESTING.md,
+WALKTHROUGH.md, INTERVIEW_PREP.md, architecture.md, roadmap.md.
+</p>
+
+</body>
+</html>
