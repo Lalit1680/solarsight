@@ -1,0 +1,22 @@
+# SolarSight pinned dependencies (installed and verified on Python 3.11).
+#
+# NOTE on torch: ultralytics pulls in torch automatically. On a machine
+# without a GPU, install the CPU build FIRST to avoid downloading a
+# multi-GB CUDA build:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements.txt
+#
+# For a GPU, install the CUDA build instead (see docs/TRAINING.md).
+
+numpy==2.4.6
+pandas==3.0.6
+pillow==12.3.0
+streamlit==1.64.0
+supabase==2.31.0
+ultralytics==8.4.165
+opencv-python-headless==5.0.0.93
+pytest==9.1.1
+
+# Training-only dependency: anonymous, login-free download of the dataset
+# from Kaggle (verified working without an API key). Not used by the app.
+kagglehub==1.0.2
