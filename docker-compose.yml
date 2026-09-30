@@ -1,0 +1,11 @@
+services:
+  solarsight:
+    build: .
+    ports:
+      - "8501:8501"
+    volumes:
+      # Trained weights are produced on the host (training/) - mount them in.
+      - ./models:/app/models:ro
+      # Secrets never enter the image; mount at runtime.
+      - ./.streamlit/secrets.toml:/app/.streamlit/secrets.toml:ro
+    restart: unless-stopped
